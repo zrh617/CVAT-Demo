@@ -1,0 +1,20 @@
+@import '../../base.scss';
+
+.cvat-run-model-content > div:not(first-child) {
+    margin-top: 10px;
+}
+
+.cvat-run-model-content-remove-mapping-icon {
+    color: $danger-icon-color;
+}
+
+.cvat-run-model-label-attribute-block {
+    padding-left: $grid-unit-size * 4;
+}
+
+.detector-runner-clean-previous-annotations-wrapper,
+.detector-runner-convert-masks-to-polygons-wrapper {
+    span {
+        margin-left: $grid-unit-size;
+    }
+}
