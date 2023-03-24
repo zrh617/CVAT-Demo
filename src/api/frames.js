@@ -227,11 +227,10 @@ FrameData.prototype.data.implementation = async function (onServerRequest) {
             }
         };
 
-        const makeActiveRequest = async () => {
+        const makeActiveRequest = () => {
             const taskDataCache = frameDataCache[this.jid];
             const activeChunk = taskDataCache.activeChunkRequest;
-            console.log(taskDataCache, 'taskDataCache', activeChunk, 'activeChunk');
-            activeChunk.request = await serverProxy.frames
+            activeChunk.request = serverProxy.frames
                 .getData(null, this.jid, activeChunk.chunkNumber)
                 .then((chunk) => {
                     frameDataCache[this.jid].activeChunkRequest.completed = true;
@@ -254,10 +253,11 @@ FrameData.prototype.data.implementation = async function (onServerRequest) {
                     }
                 })
                 .finally(() => {
-                    console.log(taskDataCache.nextChunkRequest, 'finall');
+                    console.log(taskDataCache, 'finall');
                     if (taskDataCache.nextChunkRequest) {
                         if (taskDataCache.activeChunkRequest) {
                             for (const r of taskDataCache.activeChunkRequest.callbacks) {
+                                console.log(r, 'rrrrrrrrrrr');
                                 r.reject(r.frameNumber);
                             }
                         }
@@ -266,7 +266,6 @@ FrameData.prototype.data.implementation = async function (onServerRequest) {
                         makeActiveRequest();
                     }
                 });
-                console.log(taskDataCache.activeChunkRequest, 'taskDataCache.activeChunkRequest');
         };
 
         if (isNode) {
@@ -306,6 +305,7 @@ FrameData.prototype.data.implementation = async function (onServerRequest) {
                                     ],
                                 };
                                 makeActiveRequest();
+                                resolve(frame)
                             } else if (activeRequest.chunkNumber === chunkNumber) {
                                 console.log(2);
                                 if (!activeRequest.onDecodeAll && !activeRequest.rejectRequestAll) {

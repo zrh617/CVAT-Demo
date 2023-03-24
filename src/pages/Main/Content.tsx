@@ -20,7 +20,6 @@ import {
 } from '@/icons';
 import SVGCheckIcon from '@/assets/check-icon.svg';
 import Icon from '@ant-design/icons';
-import { routes } from './Routes'
 // import 'antd/dist/antd.css';
 
 // import LogoutComponent from 'components/logout-component';

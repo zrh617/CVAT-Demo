@@ -2944,11 +2944,13 @@ function prepareData(details) {
 class WorkerWrappedAxios {
     constructor(requestInterseptor) {
         const worker = new DownloadWorker(requestInterseptor);
+        console.log(worker, 'worker');
         // const worker = new Work('./download.worker.js');
         const requests = {};
         let requestId = 0;
 
         worker.onmessage = (e) => {
+            console.log(e, 'e12345');
             if (e.data.id in requests) {
                 if (e.data.isSuccess) {
                     requests[e.data.id].resolve(e.data.responseData);
@@ -2977,17 +2979,20 @@ class WorkerWrappedAxios {
         }
 
         async function get(url, requestConfig) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async(resolve, reject) => {
+                console.log(url,'url', requestConfig, 'requestConfig');
                 const newRequestId = getRequestId();
                 requests[newRequestId] = {
                     resolve,
                     reject,
                 };
-                worker.postMessage({
+                const res = await worker.postMessage({
                     url,
-                    config,
+                    config: requestConfig,
                     id: newRequestId,
                 });
+                console.log(res, 'res', requests);
+                resolve(res)
             });
         }
 
@@ -3008,7 +3013,7 @@ const BASE_CONFIG = {
 Axios.defaults.withCredentials = true;
 Axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 Axios.defaults.xsrfCookieName = 'csrftoken';
-// const workerAxios = new WorkerWrappedAxios();
+const workerAxios = new WorkerWrappedAxios();
 Axios.interceptors.request.use((reqConfig) => {
     if ('params' in reqConfig && 'org' in reqConfig.params) {
         return reqConfig;
@@ -4368,15 +4373,14 @@ async function getImageContext(jid, frame) {
 }
 
 async function getData(tid, jid, chunk) {
-    const workerAxios = new WorkerWrappedAxios();
     const { backendAPI } = config;
 
     const url = jid === null ? `tasks/${tid}/data` : `jobs/${jid}/data`;
 
     let response = null;
     try {
-        response = await workerAxios.get(`${backendAPI}/${url}`, {
-        // response = await Axios.get(`${backendAPI}/${url}`, {
+        // response = await workerAxios.get(`${backendAPI}/${url}`, {
+        response = await Axios.get(`${backendAPI}/${url}`, {
             params: {
                 ...enableOrganization(),
                 quality: 'compressed',
@@ -4392,7 +4396,6 @@ async function getData(tid, jid, chunk) {
             response: {
                 ...errorData.response,
                 data: String.fromCharCode.apply(null, new Uint8Array(errorData.response?.data)),
-                // data: String.fromCharCode.apply(null, errorData.response.data),
             },
         });
     }
